@@ -41,6 +41,10 @@ class HeartEngine {
         return this.getChamberById(this.lastWorkingCamberId);
     }
 
+    setLastWorkingChamber(id: number): void {
+        this.lastWorkingCamberId = this.getChamberById(id).getId();
+    }
+
     getChambers(): Chamber[] {
         return this.chambers;
     }
@@ -60,12 +64,14 @@ class HeartEngine {
 }
 
 class Chamber {
+    private readonly heart: HeartEngine;
     private volume: number = Math.floor(Math.random() * 100);
     private readonly id: number;
     private stamina = 100;
     protected name: string = 'Камера №';
 
     constructor(heart: HeartEngine) {
+        this.heart = heart;
         this.volume = 100;
         this.id = heart.getChambers().length + 1;
         this.name += this.id;
@@ -77,6 +83,7 @@ class Chamber {
 
     push(pushPower: number = 100) {
         this.stamina -= pushPower / 10;
+        this.heart.setLastWorkingChamber(this.id);
     }
 }
 
@@ -95,8 +102,10 @@ class NeuralController {
         // calculate next camber tick
 
         this.processId = setTimeout(() => {
-            this.heartEngine.start();
+            this.heartEngine.work();
         }, this.heartEngine.getPulse());
+
+        chambers[0].push();
 
         return this.heartEngine.getActiveChamber();
     }
