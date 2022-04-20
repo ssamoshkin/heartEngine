@@ -108,14 +108,21 @@ class Chamber {
     private volume: number = Math.floor(Math.random() * 100);
     private readonly id: number;
     private stamina = STANDARD_CHAMBER_STAMINA;
+    private staminaMax = 100;
     protected name: string = 'Камера №';
     private destroyed = false;
+    private readonly intervalId = null;
 
     constructor(heart: HeartEngine) {
         this.heart = heart;
         this.volume = 100;
         this.id = heart.getChambers().length + 1;
         this.name += this.id;
+
+        this.intervalId = setInterval(() => {
+            this.restoreStamina(5);
+        }, 100);
+
     }
 
     getId() {
@@ -141,10 +148,20 @@ class Chamber {
         return this.stamina;
     }
 
+    restoreStamina(stamina: number): number {
+        this.stamina += stamina;
+        if (this.stamina > 100) {
+            this.stamina = this.staminaMax;
+        }
+
+        return this.stamina;
+    }
+
     destroy(): void {
         this.stamina = 0;
         this.destroyed = true;
         this.heart.decreaseActiveChambers();
+        clearInterval(this.intervalId);
     }
 
     getDestroyed(): boolean {

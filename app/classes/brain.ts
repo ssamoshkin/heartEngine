@@ -3,18 +3,16 @@ class Brain {
     private oxygenStock: number;
     private oxygenDemand: number; // условное значение нехватки кислорода
     private oxygenMax: number = 600;
-    private readonly processId = null;
+    private readonly intervalId = null;
     private alive = true;
 
     constructor(oxygenVolume = 600) {
         this.oxygenStock = oxygenVolume;
-        this.processId = setInterval(() => {
+        this.intervalId = setInterval(() => {
             this.consumeOxygen()
 
             if (this.getOxygenStock() <= 0) {
                 this.destroy();
-                clearInterval(this.processId);
-                console.log(`Мозг погибает`);
             }
 
             //console.log(`Текущее количество кислорода в мозге ${this.getOxygenDemand()}`)
@@ -55,6 +53,8 @@ class Brain {
 
     destroy(): void {
         this.alive = false;
+        clearInterval(this.intervalId);
+        console.log(`Мозг погибает`);
     }
 }
 
