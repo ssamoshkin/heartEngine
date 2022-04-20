@@ -1,3 +1,4 @@
+var STANDARD_CHAMBER_STAMINA = 100;
 var HeartEngine = /** @class */ (function () {
     function HeartEngine(chambersCount) {
         this.chambersIndexIds = {}; // доступ к объектам-камер по индексам
@@ -6,6 +7,8 @@ var HeartEngine = /** @class */ (function () {
         this.pulseCurrent = 0;
         this.pulseMax = 220;
         this.pulseMin = 20;
+        this.requestVolumeOxygen = 0;
+        this.entityPumping = null;
         this.chambersCount = chambersCount;
         this.chambers = [];
         // генерируем камеры в сердце без возможности управления их параметрами
@@ -31,6 +34,15 @@ var HeartEngine = /** @class */ (function () {
     };
     HeartEngine.prototype.getStatus = function () {
         return this.textStatus;
+    };
+    HeartEngine.prototype.pumpTo = function (entity) {
+        this.entityPumping = entity;
+    };
+    HeartEngine.prototype.setRequestVolumeOxygen = function (volume) {
+        this.requestVolumeOxygen = volume;
+    };
+    HeartEngine.prototype.transportOxygen = function (volume) {
+        this.entityPumping.takeOxygen(volume);
     };
     HeartEngine.prototype.addChamberIndex = function (chamber) {
         this.chambersIndexIds[chamber.getId()] = chamber;
@@ -60,7 +72,7 @@ var HeartEngine = /** @class */ (function () {
 var Chamber = /** @class */ (function () {
     function Chamber(heart) {
         this.volume = Math.floor(Math.random() * 100);
-        this.stamina = 100;
+        this.stamina = STANDARD_CHAMBER_STAMINA;
         this.name = 'Камера №';
         this.heart = heart;
         this.volume = 100;
@@ -73,6 +85,7 @@ var Chamber = /** @class */ (function () {
     Chamber.prototype.reduce = function (pushPower) {
         if (pushPower === void 0) { pushPower = 100; }
         this.stamina -= pushPower / 10;
+        this.heart.transportOxygen(pushPower);
         console.log("\u0441\u043E\u043A\u0440\u0430\u0449\u0435\u043D\u0438\u0435 \u043A\u0430\u043C\u0435\u0440\u044B ".concat(this.getName(), ", \u0441\u0442\u0430\u043C\u0438\u043D\u0430 ").concat(this.getStamina()));
         if (this.stamina < 0) {
             this.heart.stop();
@@ -114,7 +127,7 @@ var NeuralController = /** @class */ (function () {
         var freshCamber = this.getFreshCamber();
         this.processId = setTimeout(function () {
             _this.heartEngine.work();
-        }, 1000);
+        }, 1200);
         freshCamber.reduce();
         return this.heartEngine.getActiveChamber();
     };

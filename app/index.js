@@ -1,10 +1,14 @@
-const heartEngine = require('./classes/heartEngine')
+const HeartEngine = require('./classes/heartEngine')
+const Brain = require('./classes/brain')
 
-const heart = new heartEngine(4);
+const brain = new Brain();
+const heart = new HeartEngine(4);
 
+heart.pumpTo(brain);
 heart.start();
 
 let ticks = 100;
+
 const watcherId = setInterval(() => {
     ticks -= 1;
     if (ticks === 0) {
@@ -15,6 +19,7 @@ const watcherId = setInterval(() => {
 
     const chamber = heart.getLastWorkingChamber();
 
-    console.log(`Состояние: ${heart.getStatus()}, отработала камера ${chamber.getName()}, усталость ${chamber.getStamina()}`)
-    console.log(`Текущий пульс ${heart.getPulse()}`)
-}, 1000);
+    console.log(`Состояния: сердце - ${heart.getStatus()}, мозг - ${brain.getState()}, отработала камера ${chamber.getName()}, усталость ${chamber.getStamina()}`)
+    console.log(`Кислорода в органе ${Brain.NAME}: ${brain.getOxygenDemand()}`);
+
+}, 2000);

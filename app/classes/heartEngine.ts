@@ -1,3 +1,5 @@
+const STANDARD_CHAMBER_STAMINA = 100;
+
 class HeartEngine {
     private chambersCount: number; // количество камер в сердце
     private readonly chambers: Chamber[]; // храним массив объектов-камер
@@ -8,6 +10,9 @@ class HeartEngine {
     private pulseMax = 220;
     private pulseMin = 20;
     private textStatus;
+
+    protected requestVolumeOxygen = 0;
+    protected entityPumping = null;
 
     constructor(chambersCount) {
         this.chambersCount = chambersCount;
@@ -38,6 +43,14 @@ class HeartEngine {
 
     getStatus(): string {
         return this.textStatus;
+    }
+
+    pumpTo(entity: Object) {
+        this.entityPumping = entity;
+    }
+
+    transportOxygen(volume): void {
+        this.entityPumping.takeOxygen(volume)
     }
 
     addChamberIndex(chamber: Chamber): void {
@@ -75,7 +88,7 @@ class Chamber {
     private readonly heart: HeartEngine;
     private volume: number = Math.floor(Math.random() * 100);
     private readonly id: number;
-    private stamina = 100;
+    private stamina = STANDARD_CHAMBER_STAMINA;
     protected name: string = 'Камера №';
 
     constructor(heart: HeartEngine) {
@@ -91,6 +104,7 @@ class Chamber {
 
     reduce(pushPower: number = 100) {
         this.stamina -= pushPower / 10;
+        this.heart.transportOxygen(pushPower);
 
         console.log(`сокращение камеры ${this.getName()}, стамина ${this.getStamina()}`)
 
@@ -146,7 +160,7 @@ class NeuralController {
 
         this.processId = setTimeout(() => {
             this.heartEngine.work();
-        }, 1000);
+        }, 1200);
 
         freshCamber.reduce();
 
