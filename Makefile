@@ -1,0 +1,2 @@
+appstart:
+	node app/index
