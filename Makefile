@@ -1,2 +1,2 @@
-app:
+appstart:
 	node app/index

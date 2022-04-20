@@ -1,5 +1,6 @@
 var HeartEngine = /** @class */ (function () {
     function HeartEngine(chambersCount) {
+        this.chambersIndexIds = {}; // доступ к объектам-камер по индексам
         this.lastWorkingCamberId = 0; // последнеотработавшая камера
         this.controller = null;
         this.pulseCurrent = 0;
@@ -14,15 +15,22 @@ var HeartEngine = /** @class */ (function () {
             this.addChamberIndex(chamber);
         }
     }
-    HeartEngine.prototype.start = function () {
+    HeartEngine.prototype.start = function (pulse) {
+        if (pulse === void 0) { pulse = 60; }
+        this.textStatus = "Запущено";
+        this.pulseCurrent = pulse;
         this.controller = new NeuralController(this); // // управление камерами через отдельный контроллер
         this.work();
     };
     HeartEngine.prototype.stop = function () {
+        this.textStatus = "Остановлено";
         clearTimeout(this.controller.processId);
     };
     HeartEngine.prototype.work = function () {
         this.controller.tick();
+    };
+    HeartEngine.prototype.getStatus = function () {
+        return this.textStatus;
     };
     HeartEngine.prototype.addChamberIndex = function (chamber) {
         this.chambersIndexIds[chamber.getId()] = chamber;
@@ -65,7 +73,18 @@ var Chamber = /** @class */ (function () {
     Chamber.prototype.push = function (pushPower) {
         if (pushPower === void 0) { pushPower = 100; }
         this.stamina -= pushPower / 10;
+        console.log("\u0441\u043E\u043A\u0440\u0430\u0449\u0435\u043D\u0438\u0435 \u043A\u0430\u043C\u0435\u0440\u044B ".concat(this.getName(), ", \u0441\u0442\u0430\u043C\u0438\u043D\u0430 ").concat(this.getStamina()));
+        if (this.stamina < 0) {
+            this.heart.stop();
+            console.log("\u041E\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430 \u0441\u0435\u0440\u0434\u0446\u0430, \u0442\u0430\u043A \u043A\u0430\u043A \u043F\u0435\u0440\u0435\u0443\u0442\u043E\u043C\u0438\u043B\u0430\u0441\u044C ".concat(this.getName()));
+        }
         this.heart.setLastWorkingChamber(this.id);
+    };
+    Chamber.prototype.getStamina = function () {
+        return this.stamina;
+    };
+    Chamber.prototype.getName = function () {
+        return this.name;
     };
     return Chamber;
 }());
@@ -80,7 +99,7 @@ var NeuralController = /** @class */ (function () {
         // calculate next camber tick
         this.processId = setTimeout(function () {
             _this.heartEngine.work();
-        }, this.heartEngine.getPulse());
+        }, 1000);
         chambers[0].push();
         return this.heartEngine.getActiveChamber();
     };

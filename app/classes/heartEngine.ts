@@ -1,12 +1,13 @@
 class HeartEngine {
     private chambersCount: number; // количество камер в сердце
     private readonly chambers: Chamber[]; // храним массив объектов-камер
-    private chambersIndexIds: Object; // доступ к объектам-камер по индексам
+    private chambersIndexIds: Object = {}; // доступ к объектам-камер по индексам
     private lastWorkingCamberId: number = 0; // последнеотработавшая камера
     private controller = null;
     private pulseCurrent = 0;
     private pulseMax = 220;
     private pulseMin = 20;
+    private textStatus;
 
     constructor(chambersCount) {
         this.chambersCount = chambersCount;
@@ -19,17 +20,24 @@ class HeartEngine {
         }
     }
 
-    start() {
+    start(pulse = 60) {
+        this.textStatus = "Запущено";
+        this.pulseCurrent = pulse;
         this.controller = new NeuralController(this); // // управление камерами через отдельный контроллер
         this.work();
     }
 
     stop() {
+        this.textStatus = "Остановлено"
         clearTimeout(this.controller.processId);
     }
 
     work() {
         this.controller.tick();
+    }
+
+    getStatus(): string {
+        return this.textStatus;
     }
 
     addChamberIndex(chamber: Chamber): void {
@@ -83,7 +91,23 @@ class Chamber {
 
     push(pushPower: number = 100) {
         this.stamina -= pushPower / 10;
+
+        console.log(`сокращение камеры ${this.getName()}, стамина ${this.getStamina()}`)
+
+        if (this.stamina < 0) {
+            this.heart.stop();
+            console.log(`Остановка сердца, так как переутомилась ${this.getName()}`)
+        }
+
         this.heart.setLastWorkingChamber(this.id);
+    }
+
+    getStamina(): number {
+        return this.stamina;
+    }
+
+    getName(): string {
+        return this.name;
     }
 }
 
@@ -103,7 +127,7 @@ class NeuralController {
 
         this.processId = setTimeout(() => {
             this.heartEngine.work();
-        }, this.heartEngine.getPulse());
+        }, 1000);
 
         chambers[0].push();
 

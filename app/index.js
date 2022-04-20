@@ -12,5 +12,9 @@ const watcherId = setInterval(() => {
         clearInterval(watcherId);
         console.log(`работа сердца остановлена`)
     }
-    console.log(`последним отработала камера ${heart.getLastWorkingChamber()}`)
+
+    const chamber = heart.getLastWorkingChamber();
+
+    console.log(`Состояние: ${heart.getStatus()}, отработала камера ${chamber.getName()}, усталость ${chamber.getStamina()}`)
+    console.log(`Текущий пульс ${heart.getPulse()}`)
 }, 1000);
