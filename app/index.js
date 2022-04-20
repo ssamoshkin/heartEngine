@@ -1,8 +1,9 @@
 const HeartEngine = require('./classes/heartEngine')
 const Brain = require('./classes/brain')
+const config = require('./config')
 
 const brain = new Brain();
-const heart = new HeartEngine(2);
+const heart = new HeartEngine(config.default_heart_chamber);
 
 heart.pumpTo(brain);
 heart.start();

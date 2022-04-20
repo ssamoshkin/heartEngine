@@ -79,7 +79,6 @@ var HeartEngine = /** @class */ (function () {
     };
     HeartEngine.prototype.increasePulse = function (value) {
         this.pulseCurrent += value;
-        console.log("debug ".concat(this.pulseCurrent));
         if (this.pulseCurrent > this.pulseMax) {
             this.stop("\u043F\u0440\u0435\u0432\u044B\u0448\u0435\u043D \u043C\u0430\u043A\u0441\u0438\u043C\u0430\u043B\u044C\u043D\u044B\u0439 \u043F\u0443\u043B\u044C\u0441 \u0441\u0435\u0440\u0434\u0446\u0430!");
         }
