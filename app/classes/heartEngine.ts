@@ -56,8 +56,8 @@ class HeartEngine {
         }
     }
 
-    getStatus(): string {
-        return this.textStatus;
+    getActive(): boolean {
+        return this.active;
     }
 
     pumpTo(entity: Object): void {
@@ -242,9 +242,11 @@ class NeuralController {
             this.heartEngine.increasePulse(10);
         }
 
-        this.intervalId = setTimeout(() => {
-            this.heartEngine.work();
-        }, 60 / this.heartEngine.getPulse() * 1000);
+        if (this.heartEngine.getActive()) {
+            this.intervalId = setTimeout(() => {
+                this.heartEngine.work();
+            }, Math.round(60 / this.heartEngine.getPulse() * 1000));
+        }
 
         return this.heartEngine.getActiveChamber();
     }

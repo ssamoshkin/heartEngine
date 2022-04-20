@@ -46,8 +46,8 @@ var HeartEngine = /** @class */ (function () {
             this.controller.tick();
         }
     };
-    HeartEngine.prototype.getStatus = function () {
-        return this.textStatus;
+    HeartEngine.prototype.getActive = function () {
+        return this.active;
     };
     HeartEngine.prototype.pumpTo = function (entity) {
         this.entityPumping = entity;
@@ -189,9 +189,11 @@ var NeuralController = /** @class */ (function () {
         else if (oxygenDemand > 100) {
             this.heartEngine.increasePulse(10);
         }
-        this.intervalId = setTimeout(function () {
-            _this.heartEngine.work();
-        }, 60 / this.heartEngine.getPulse() * 1000);
+        if (this.heartEngine.getActive()) {
+            this.intervalId = setTimeout(function () {
+                _this.heartEngine.work();
+            }, Math.round(60 / this.heartEngine.getPulse() * 1000));
+        }
         return this.heartEngine.getActiveChamber();
     };
     return NeuralController;
