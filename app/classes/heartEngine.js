@@ -19,7 +19,9 @@ class Cardiac {
 }
 
 class NeuralController {
-
+    constructor(HeartEngine) {
+        this.heartEngine = HeartEngine;
+    }
 }
 
 module.exports = HeartEngine
