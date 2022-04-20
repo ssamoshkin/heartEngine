@@ -1,16 +1,17 @@
 class Brain {
     static NAME: string = "Мозг";
-    private oxygenDemand: number;
-    private oxygenDemandMax: number = 600;
+    private oxygenStock: number;
+    private oxygenDemand: number; // условное значение нехватки кислорода
+    private oxygenMax: number = 600;
     private readonly processId = null;
     private alive = true;
 
     constructor(oxygenVolume = 600) {
-        this.oxygenDemand = oxygenVolume;
+        this.oxygenStock = oxygenVolume;
         this.processId = setInterval(() => {
             this.consumeOxygen()
 
-            if (this.getOxygenDemand() <= 0) {
+            if (this.getOxygenStock() <= 0) {
                 this.destroy();
                 clearInterval(this.processId);
                 console.log(`Мозг погибает`);
@@ -21,25 +22,31 @@ class Brain {
     }
 
     consumeOxygen(volume = 100): void {
-        this.oxygenDemand -= volume;
+        this.oxygenStock -= volume;
     }
 
     restoreOxygen(volume): void {
-        this.oxygenDemand += volume;
-        if (this.oxygenDemand > this.oxygenDemandMax) {
-            this.oxygenDemand = this.oxygenDemandMax;
+        this.oxygenStock += volume;
+        if (this.oxygenStock > this.oxygenMax) {
+            this.oxygenStock = this.oxygenMax;
         }
     }
 
-    getOxygenDemand(): number {
-        return this.oxygenDemand;
+    getOxygenStock(): number {
+        return this.oxygenStock;
     }
 
-    takeOxygen(volume): void {
+    getOxygenDemand(): number {
+        return this.oxygenMax - this.oxygenStock;
+    }
+
+    takeOxygen(volume): number {
         if (!this.alive) return;
 
         console.log(`Мозгом получено кислорода: ${volume}`);
         this.restoreOxygen(volume);
+
+        return this.getOxygenDemand();
     }
 
     getState(): string {

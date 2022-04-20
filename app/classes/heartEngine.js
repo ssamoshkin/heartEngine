@@ -44,7 +44,7 @@ var HeartEngine = /** @class */ (function () {
         this.entityPumping = entity;
     };
     HeartEngine.prototype.transportOxygen = function (volume) {
-        this.entityPumping.takeOxygen(volume);
+        return this.entityPumping.takeOxygen(volume);
     };
     HeartEngine.prototype.addChamberIndex = function (chamber) {
         this.chambersIndexIds[chamber.getId()] = chamber;
@@ -69,6 +69,12 @@ var HeartEngine = /** @class */ (function () {
     HeartEngine.prototype.decreaseActiveChambers = function () {
         return this.chambersActiveCount -= 1;
     };
+    HeartEngine.prototype.increasePulse = function (value) {
+        this.pulseCurrent += value;
+    };
+    HeartEngine.prototype.decreasePulse = function (value) {
+        this.pulseCurrent -= value;
+    };
     HeartEngine.prototype.getPulse = function () {
         return this.pulseCurrent;
     };
@@ -91,18 +97,20 @@ var Chamber = /** @class */ (function () {
     Chamber.prototype.reduce = function (pushPower) {
         if (pushPower === void 0) { pushPower = 100; }
         this.stamina -= pushPower / 10;
-        this.heart.transportOxygen(pushPower / 2);
-        console.log("\u0441\u043E\u043A\u0440\u0430\u0449\u0435\u043D\u0438\u0435 \u043A\u0430\u043C\u0435\u0440\u044B ".concat(this.getName(), ", \u0441\u0442\u0430\u043C\u0438\u043D\u0430 ").concat(this.getStamina()));
         if (this.stamina < 0) {
             this.destroy();
             console.log("\u0423\u043D\u0438\u0447\u0442\u043E\u0436\u0435\u043D\u0430 ".concat(this.getName()));
+            return 0; // камера не смогла ничего не прокачать
         }
+        console.log("\u0441\u043E\u043A\u0440\u0430\u0449\u0435\u043D\u0438\u0435 \u043A\u0430\u043C\u0435\u0440\u044B ".concat(this.getName(), ", \u0441\u0442\u0430\u043C\u0438\u043D\u0430 ").concat(this.getStamina()));
         this.heart.setLastWorkingChamber(this.id);
+        return pushPower / 2; // возвращаем прокаченный объем, о котором знает камера
     };
     Chamber.prototype.getStamina = function () {
         return this.stamina;
     };
     Chamber.prototype.destroy = function () {
+        this.stamina = 0;
         this.destroyed = true;
         this.heart.decreaseActiveChambers();
     };
@@ -140,10 +148,20 @@ var NeuralController = /** @class */ (function () {
     NeuralController.prototype.tick = function () {
         var _this = this;
         var freshCamber = this.getFreshCamber();
+        var pushedVolume = freshCamber.reduce();
+        if (pushedVolume === 0) {
+            console.log("\u0412\u043D\u0438\u043C\u0430\u043D\u0438\u0435! \u041A\u0430\u043C\u0435\u0440\u0430 \u043D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043F\u0440\u043E\u043A\u0430\u0447\u0430\u043B\u0430!");
+        }
+        var oxygenDemand = this.heartEngine.transportOxygen(pushedVolume); // после отдачи кислорода органу, узнаем его дальнейшую потребность в нем
+        if (oxygenDemand <= 0) {
+            this.heartEngine.decreasePulse(10);
+        }
+        else if (oxygenDemand > 100) {
+            this.heartEngine.increasePulse(10);
+        }
         this.processId = setTimeout(function () {
             _this.heartEngine.work();
-        }, 1200);
-        freshCamber.reduce();
+        }, 60 / this.heartEngine.getPulse() * 1000);
         return this.heartEngine.getActiveChamber();
     };
     return NeuralController;

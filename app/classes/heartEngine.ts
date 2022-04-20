@@ -56,8 +56,8 @@ class HeartEngine {
         this.entityPumping = entity;
     }
 
-    transportOxygen(volume): void {
-        this.entityPumping.takeOxygen(volume)
+    transportOxygen(volume): number {
+        return this.entityPumping.takeOxygen(volume)
     }
 
     addChamberIndex(chamber: Chamber): void {
@@ -89,6 +89,14 @@ class HeartEngine {
         return this.chambersActiveCount -= 1;
     }
 
+    increasePulse(value) {
+        this.pulseCurrent += value;
+    }
+
+    decreasePulse(value) {
+        this.pulseCurrent -= value;
+    }
+
     getPulse(): number {
         return this.pulseCurrent;
     }
@@ -116,16 +124,17 @@ class Chamber {
 
     reduce(pushPower: number = 100) {
         this.stamina -= pushPower / 10;
-        this.heart.transportOxygen(pushPower / 2);
-
-        console.log(`сокращение камеры ${this.getName()}, стамина ${this.getStamina()}`)
 
         if (this.stamina < 0) {
             this.destroy();
             console.log(`Уничтожена ${this.getName()}`)
+            return 0; // камера не смогла ничего не прокачать
         }
 
+        console.log(`сокращение камеры ${this.getName()}, стамина ${this.getStamina()}`)
+
         this.heart.setLastWorkingChamber(this.id);
+        return pushPower / 2; // возвращаем прокаченный объем, о котором знает камера
     }
 
     getStamina(): number {
@@ -133,6 +142,7 @@ class Chamber {
     }
 
     destroy(): void {
+        this.stamina = 0;
         this.destroyed = true;
         this.heart.decreaseActiveChambers();
     }
@@ -183,11 +193,23 @@ class NeuralController {
     tick() {
         const freshCamber = this.getFreshCamber();
 
+        const pushedVolume = freshCamber.reduce();
+
+        if (pushedVolume === 0) {
+            console.log(`Внимание! Камера ничего не прокачала!`);
+        }
+
+        const oxygenDemand = this.heartEngine.transportOxygen(pushedVolume); // после отдачи кислорода органу, узнаем его дальнейшую потребность в нем
+
+        if (oxygenDemand <= 0) {
+            this.heartEngine.decreasePulse(10);
+        } else if (oxygenDemand > 100) {
+            this.heartEngine.increasePulse(10);
+        }
+
         this.processId = setTimeout(() => {
             this.heartEngine.work();
-        }, 1200);
-
-        freshCamber.reduce();
+        }, 60 / this.heartEngine.getPulse() * 1000);
 
         return this.heartEngine.getActiveChamber();
     }

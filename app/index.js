@@ -19,10 +19,10 @@ const watcherId = setInterval(() => {
 
     const chamber = heart.getLastWorkingChamber();
 
-    console.log(`Состояния: сердце - ${heart.getStatus()}, мозг - ${brain.getState()}, отработала камера ${chamber.getName()}, усталость ${chamber.getStamina()}`)
+    console.log(`Состояния: пульс - ${heart.getPulse()}, отработала камера ${chamber.getName()}, усталость ${chamber.getStamina()}`)
 
     if (brain.getState() === "alive") {
-        console.log(`Кислорода в органе ${Brain.NAME}: ${brain.getOxygenDemand()}`);
+        console.log(`Кислорода в органе ${Brain.NAME}: ${brain.getOxygenStock()}`);
     } else {
         console.log(`Мозг погиб, останавливаем работу сердца..`)
         heart.stop()
