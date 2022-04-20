@@ -165,7 +165,7 @@ class NeuralController {
         this.heartEngine = HeartEngine;
     }
 
-    getFreshCamber(): Chamber {
+    getFreshChamber(): Chamber {
         const chambers = this.heartEngine.getChambers();
 
         let maxStamina = chambers[chambers.length - 1].getStamina();
@@ -191,7 +191,7 @@ class NeuralController {
     }
 
     tick() {
-        const freshCamber = this.getFreshCamber();
+        const freshCamber = this.getFreshChamber();
 
         const pushedVolume = freshCamber.reduce();
 
