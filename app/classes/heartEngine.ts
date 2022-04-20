@@ -99,8 +99,6 @@ class HeartEngine {
     increasePulse(value) {
         this.pulseCurrent += value;
 
-        console.log(`debug ${this.pulseCurrent}`)
-
         if (this.pulseCurrent > this.pulseMax) {
             this.stop(`превышен максимальный пульс сердца!`);
         }
