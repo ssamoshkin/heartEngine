@@ -38,6 +38,7 @@ class HeartEngine {
 
     stop(reason: string = null): void {
         this.active = false;
+        this.pulseCurrent = 0;
         this.textStatus = "Остановлено"
         clearTimeout(this.controller.processId);
         if (reason) {
