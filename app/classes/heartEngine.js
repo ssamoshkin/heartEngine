@@ -31,6 +31,7 @@ var HeartEngine = /** @class */ (function () {
     HeartEngine.prototype.stop = function (reason) {
         if (reason === void 0) { reason = null; }
         this.active = false;
+        this.pulseCurrent = 0;
         this.textStatus = "Остановлено";
         clearTimeout(this.controller.processId);
         if (reason) {
