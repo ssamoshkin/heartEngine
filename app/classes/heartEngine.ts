@@ -1,13 +1,13 @@
 class HeartEngine {
-    private cardiacNumber: number;
+    private chambersNumber: number;
     private readonly chambers: Chamber[];
     private chambersIndexIds: Object;
     private lastWorkingCamberId: number;
 
-    constructor(cardiacNumber) {
-        this.cardiacNumber = cardiacNumber;
+    constructor(chambersNumber) {
+        this.chambersNumber = chambersNumber;
         this.chambers = [];
-        for (let i = 0; i < cardiacNumber; i += 1) {
+        for (let i = 0; i < chambersNumber; i += 1) {
             const chamber = new Chamber();
             this.chambers.push(chamber)
             this.addChamberIndex(chamber)
