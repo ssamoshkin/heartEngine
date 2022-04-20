@@ -70,7 +70,7 @@ var Chamber = /** @class */ (function () {
     Chamber.prototype.getId = function () {
         return this.id;
     };
-    Chamber.prototype.push = function (pushPower) {
+    Chamber.prototype.reduce = function (pushPower) {
         if (pushPower === void 0) { pushPower = 100; }
         this.stamina -= pushPower / 10;
         console.log("\u0441\u043E\u043A\u0440\u0430\u0449\u0435\u043D\u0438\u0435 \u043A\u0430\u043C\u0435\u0440\u044B ".concat(this.getName(), ", \u0441\u0442\u0430\u043C\u0438\u043D\u0430 ").concat(this.getStamina()));
@@ -93,14 +93,29 @@ var NeuralController = /** @class */ (function () {
         this.processId = null;
         this.heartEngine = HeartEngine;
     }
+    NeuralController.prototype.getFreshCamber = function () {
+        var chambers = this.heartEngine.getChambers();
+        var maxStamina = chambers[chambers.length - 1].getStamina();
+        var chamberFreshId = chambers[chambers.length - 1].getId();
+        chambers.forEach(function (chamber) {
+            var stamina = chamber.getStamina();
+            if (stamina > maxStamina) {
+                maxStamina = stamina;
+                chamberFreshId = chamber.getId();
+            }
+        });
+        if (!chamberFreshId) {
+            throw ('Не удалось вычислить менее уставшуюю камеру');
+        }
+        return this.heartEngine.getChamberById(chamberFreshId);
+    };
     NeuralController.prototype.tick = function () {
         var _this = this;
-        var chambers = this.heartEngine.getChambers();
-        // calculate next camber tick
+        var freshCamber = this.getFreshCamber();
         this.processId = setTimeout(function () {
             _this.heartEngine.work();
         }, 1000);
-        chambers[0].push();
+        freshCamber.reduce();
         return this.heartEngine.getActiveChamber();
     };
     return NeuralController;

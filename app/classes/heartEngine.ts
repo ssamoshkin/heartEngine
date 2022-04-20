@@ -89,7 +89,7 @@ class Chamber {
         return this.id;
     }
 
-    push(pushPower: number = 100) {
+    reduce(pushPower: number = 100) {
         this.stamina -= pushPower / 10;
 
         console.log(`сокращение камеры ${this.getName()}, стамина ${this.getStamina()}`)
@@ -120,16 +120,35 @@ class NeuralController {
         this.heartEngine = HeartEngine;
     }
 
-    tick() {
+    getFreshCamber(): Chamber {
         const chambers = this.heartEngine.getChambers();
 
-        // calculate next camber tick
+        let maxStamina = chambers[chambers.length - 1].getStamina();
+        let chamberFreshId = chambers[chambers.length - 1].getId();
+
+        chambers.forEach((chamber: Chamber) => {
+            const stamina = chamber.getStamina();
+            if (stamina > maxStamina) {
+                maxStamina = stamina;
+                chamberFreshId = chamber.getId()
+            }
+        });
+
+        if (!chamberFreshId) {
+            throw ('Не удалось вычислить менее уставшуюю камеру');
+        }
+
+        return this.heartEngine.getChamberById(chamberFreshId);
+    }
+
+    tick() {
+        const freshCamber = this.getFreshCamber();
 
         this.processId = setTimeout(() => {
             this.heartEngine.work();
         }, 1000);
 
-        chambers[0].push();
+        freshCamber.reduce();
 
         return this.heartEngine.getActiveChamber();
     }
