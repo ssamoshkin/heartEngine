@@ -3,5 +3,5 @@ const heartEngine = require('./classes/heartEngine')
 const heart = new heartEngine(4);
 
 setInterval(() => {
-    heart.getLastWorkingCardiac()
+    console.log(`последним отработал ${heart.getLastWorkingChamber().name}`)
 }, 1000);
