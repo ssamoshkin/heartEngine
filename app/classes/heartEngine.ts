@@ -1,24 +1,33 @@
 class HeartEngine {
+    private cardiacNumber: number;
+    private readonly chambers: Chamber[];
+
     constructor(cardiacNumber) {
         this.cardiacNumber = cardiacNumber;
-        this.cardiacs = [];
+        this.chambers = [];
         for (let i = 0; i < cardiacNumber; i += 1) {
-            this.cardiacs.push(new Cardiac())
+            this.chambers.push(new Chamber())
         }
     }
-    getLastWorkingCardiac() {
+    getLastWorkingChamber(): Chamber {
         return null;
+    }
+
+    getChamber(n: number): Chamber {
+        return this.chambers[n];
     }
 
 }
 
-class Cardiac {
+class Chamber {
+    private volume: number;
     constructor() {
         this.volume = 100;
     }
 }
 
 class NeuralController {
+    private heartEngine: HeartEngine;
     constructor(HeartEngine) {
         this.heartEngine = HeartEngine;
     }
