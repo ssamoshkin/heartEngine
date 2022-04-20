@@ -2,6 +2,7 @@ var STANDARD_CHAMBER_STAMINA = 100;
 var DEFAULT_STAMINA_RESTORE = 1;
 var HeartEngine = /** @class */ (function () {
     function HeartEngine(chambersCount) {
+        this.active = true;
         this.chambersIndexIds = {}; // доступ к объектам-камер по индексам
         this.lastWorkingCamberId = 0; // последнеотработавшая камера
         this.controller = null;
@@ -27,19 +28,26 @@ var HeartEngine = /** @class */ (function () {
         this.controller = new NeuralController(this); // // управление камерами через отдельный контроллер
         this.work();
     };
-    HeartEngine.prototype.stop = function () {
+    HeartEngine.prototype.stop = function (reason) {
+        if (reason === void 0) { reason = null; }
+        this.active = false;
+        this.pulseCurrent = 0;
         this.textStatus = "Остановлено";
         clearTimeout(this.controller.processId);
+        if (reason) {
+            console.log("\u0421\u0435\u0440\u0434\u0435 \u0431\u044B\u043B\u043E \u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E \u043F\u043E \u043F\u0440\u0438\u0447\u0438\u043D\u0435: ".concat(reason));
+        }
     };
     HeartEngine.prototype.work = function () {
         if (this.chambersActiveCount === 0) {
-            console.log("\u0423\u043D\u0438\u0447\u0442\u043E\u0436\u0435\u043D\u044B \u0432\u0441\u0435 \u043A\u0430\u043C\u0435\u0440\u044B, \u0441\u0435\u0440\u0434\u0446\u0435 \u043D\u0435 \u043C\u043E\u0436\u0435\u0442 \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0430\u0442\u044C \u0440\u0430\u0431\u043E\u0442\u0443");
-            return this.stop();
+            return this.stop("\u0423\u043D\u0438\u0447\u0442\u043E\u0436\u0435\u043D\u044B \u0432\u0441\u0435 \u043A\u0430\u043C\u0435\u0440\u044B, \u0441\u0435\u0440\u0434\u0446\u0435 \u043D\u0435 \u043C\u043E\u0436\u0435\u0442 \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0430\u0442\u044C \u0440\u0430\u0431\u043E\u0442\u0443");
         }
-        this.controller.tick();
+        if (this.active) {
+            this.controller.tick();
+        }
     };
-    HeartEngine.prototype.getStatus = function () {
-        return this.textStatus;
+    HeartEngine.prototype.getActive = function () {
+        return this.active;
     };
     HeartEngine.prototype.pumpTo = function (entity) {
         this.entityPumping = entity;
@@ -72,9 +80,15 @@ var HeartEngine = /** @class */ (function () {
     };
     HeartEngine.prototype.increasePulse = function (value) {
         this.pulseCurrent += value;
+        if (this.pulseCurrent > this.pulseMax) {
+            this.stop("\u043F\u0440\u0435\u0432\u044B\u0448\u0435\u043D \u043C\u0430\u043A\u0441\u0438\u043C\u0430\u043B\u044C\u043D\u044B\u0439 \u043F\u0443\u043B\u044C\u0441 \u0441\u0435\u0440\u0434\u0446\u0430!");
+        }
     };
     HeartEngine.prototype.decreasePulse = function (value) {
         this.pulseCurrent -= value;
+        if (this.pulseCurrent < this.pulseMin) {
+            this.stop("\u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0440\u0435\u0434\u043A\u0438\u0439 \u043F\u0443\u043B\u044C\u0441, \u043D\u0435\u0432\u043E\u0437\u043C\u043E\u0436\u043D\u043E \u0440\u0430\u0431\u043E\u0442\u0430\u0442\u044C");
+        }
     };
     HeartEngine.prototype.getPulse = function () {
         return this.pulseCurrent;
@@ -140,7 +154,7 @@ var Chamber = /** @class */ (function () {
 }());
 var NeuralController = /** @class */ (function () {
     function NeuralController(HeartEngine) {
-        this.processId = null;
+        this.intervalId = null;
         this.heartEngine = HeartEngine;
     }
     NeuralController.prototype.getFreshChamber = function () {
@@ -175,9 +189,11 @@ var NeuralController = /** @class */ (function () {
         else if (oxygenDemand > 100) {
             this.heartEngine.increasePulse(10);
         }
-        this.processId = setTimeout(function () {
-            _this.heartEngine.work();
-        }, 60 / this.heartEngine.getPulse() * 1000);
+        if (this.heartEngine.getActive()) {
+            this.intervalId = setTimeout(function () {
+                _this.heartEngine.work();
+            }, Math.round(60 / this.heartEngine.getPulse() * 1000));
+        }
         return this.heartEngine.getActiveChamber();
     };
     return NeuralController;

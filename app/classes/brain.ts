@@ -1,7 +1,6 @@
 class Brain {
     static NAME: string = "Мозг";
     private oxygenStock: number;
-    private oxygenDemand: number; // условное значение нехватки кислорода
     private oxygenMax: number = 600;
     private readonly intervalId = null;
     private alive = true;

@@ -2,6 +2,7 @@ const STANDARD_CHAMBER_STAMINA = 100;
 const DEFAULT_STAMINA_RESTORE = 1;
 
 class HeartEngine {
+    private active: boolean = true;
     private chambersCount: number; // количество камер в сердце
     private chambersActiveCount: number; // количество работающих камер в сердце
     private readonly chambers: Chamber[]; // храним массив объектов-камер
@@ -35,22 +36,28 @@ class HeartEngine {
         this.work();
     }
 
-    stop(): void {
+    stop(reason: string = null): void {
+        this.active = false;
+        this.pulseCurrent = 0;
         this.textStatus = "Остановлено"
         clearTimeout(this.controller.processId);
+        if (reason) {
+            console.log(`Серде было остановлено по причине: ${reason}`)
+        }
     }
 
     work(): void {
         if (this.chambersActiveCount === 0) {
-            console.log(`Уничтожены все камеры, сердце не может продолжать работу`)
-            return this.stop();
+            return this.stop(`Уничтожены все камеры, сердце не может продолжать работу`);
         }
 
-        this.controller.tick();
+        if (this.active) {
+            this.controller.tick();
+        }
     }
 
-    getStatus(): string {
-        return this.textStatus;
+    getActive(): boolean {
+        return this.active;
     }
 
     pumpTo(entity: Object): void {
@@ -92,10 +99,18 @@ class HeartEngine {
 
     increasePulse(value) {
         this.pulseCurrent += value;
+
+        if (this.pulseCurrent > this.pulseMax) {
+            this.stop(`превышен максимальный пульс сердца!`);
+        }
     }
 
     decreasePulse(value) {
         this.pulseCurrent -= value;
+
+        if (this.pulseCurrent < this.pulseMin) {
+            this.stop(`слишком редкий пульс, невозможно работать`);
+        }
     }
 
     getPulse(): number {
@@ -179,7 +194,7 @@ class Chamber {
 class NeuralController {
     // управляет камерами, балансирует нагрузку
     private heartEngine: HeartEngine;
-    private processId = null;
+    private intervalId = null;
 
     constructor(HeartEngine) {
         this.heartEngine = HeartEngine;
@@ -227,9 +242,11 @@ class NeuralController {
             this.heartEngine.increasePulse(10);
         }
 
-        this.processId = setTimeout(() => {
-            this.heartEngine.work();
-        }, 60 / this.heartEngine.getPulse() * 1000);
+        if (this.heartEngine.getActive()) {
+            this.intervalId = setTimeout(() => {
+                this.heartEngine.work();
+            }, Math.round(60 / this.heartEngine.getPulse() * 1000));
+        }
 
         return this.heartEngine.getActiveChamber();
     }
