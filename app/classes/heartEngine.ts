@@ -1,4 +1,5 @@
 const STANDARD_CHAMBER_STAMINA = 100;
+const DEFAULT_STAMINA_RESTORE = 2;
 
 class HeartEngine {
     private chambersCount: number; // количество камер в сердце
@@ -120,7 +121,7 @@ class Chamber {
         this.name += this.id;
 
         this.intervalId = setInterval(() => {
-            this.restoreStamina(5);
+            this.restoreStamina(DEFAULT_STAMINA_RESTORE);
         }, 100);
 
     }

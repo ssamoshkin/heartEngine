@@ -82,14 +82,20 @@ var HeartEngine = /** @class */ (function () {
 }());
 var Chamber = /** @class */ (function () {
     function Chamber(heart) {
+        var _this = this;
         this.volume = Math.floor(Math.random() * 100);
         this.stamina = STANDARD_CHAMBER_STAMINA;
+        this.staminaMax = 100;
         this.name = 'Камера №';
         this.destroyed = false;
+        this.intervalId = null;
         this.heart = heart;
         this.volume = 100;
         this.id = heart.getChambers().length + 1;
         this.name += this.id;
+        this.intervalId = setInterval(function () {
+            _this.restoreStamina(5);
+        }, 100);
     }
     Chamber.prototype.getId = function () {
         return this.id;
@@ -109,10 +115,18 @@ var Chamber = /** @class */ (function () {
     Chamber.prototype.getStamina = function () {
         return this.stamina;
     };
+    Chamber.prototype.restoreStamina = function (stamina) {
+        this.stamina += stamina;
+        if (this.stamina > 100) {
+            this.stamina = this.staminaMax;
+        }
+        return this.stamina;
+    };
     Chamber.prototype.destroy = function () {
         this.stamina = 0;
         this.destroyed = true;
         this.heart.decreaseActiveChambers();
+        clearInterval(this.intervalId);
     };
     Chamber.prototype.getDestroyed = function () {
         return this.destroyed;
@@ -127,7 +141,7 @@ var NeuralController = /** @class */ (function () {
         this.processId = null;
         this.heartEngine = HeartEngine;
     }
-    NeuralController.prototype.getFreshCamber = function () {
+    NeuralController.prototype.getFreshChamber = function () {
         var chambers = this.heartEngine.getChambers();
         var maxStamina = chambers[chambers.length - 1].getStamina();
         var chamberFreshId = chambers[chambers.length - 1].getId();
@@ -147,7 +161,7 @@ var NeuralController = /** @class */ (function () {
     };
     NeuralController.prototype.tick = function () {
         var _this = this;
-        var freshCamber = this.getFreshCamber();
+        var freshCamber = this.getFreshChamber();
         var pushedVolume = freshCamber.reduce();
         if (pushedVolume === 0) {
             console.log("\u0412\u043D\u0438\u043C\u0430\u043D\u0438\u0435! \u041A\u0430\u043C\u0435\u0440\u0430 \u043D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043F\u0440\u043E\u043A\u0430\u0447\u0430\u043B\u0430!");

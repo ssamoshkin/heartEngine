@@ -2,7 +2,7 @@ const HeartEngine = require('./classes/heartEngine')
 const Brain = require('./classes/brain')
 
 const brain = new Brain();
-const heart = new HeartEngine(4);
+const heart = new HeartEngine(2);
 
 heart.pumpTo(brain);
 heart.start();
