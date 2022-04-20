@@ -18,6 +18,7 @@ const watcherId = setInterval(() => {
         console.log(`Мозг погиб, останавливаем работу сердца..`)
         heart.stop()
         clearInterval(watcherId);
+        process.kill(process.pid, 'SIGTERM')
     }
 
 }, 2000);
