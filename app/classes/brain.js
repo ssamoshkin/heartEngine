@@ -1,10 +1,11 @@
 var Brain = /** @class */ (function () {
-    function Brain() {
+    function Brain(oxygenVolume) {
+        if (oxygenVolume === void 0) { oxygenVolume = 600; }
         var _this = this;
-        this.oxygenDemand = 100;
         this.oxygenDemandMax = 600;
         this.processId = null;
         this.alive = true;
+        this.oxygenDemand = oxygenVolume;
         this.processId = setInterval(function () {
             _this.consumeOxygen();
             if (_this.getOxygenDemand() <= 0) {
@@ -12,7 +13,7 @@ var Brain = /** @class */ (function () {
                 clearInterval(_this.processId);
                 console.log("\u041C\u043E\u0437\u0433 \u043F\u043E\u0433\u0438\u0431\u0430\u0435\u0442");
             }
-            console.log("\u0422\u0435\u043A\u0443\u0449\u0435\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u043A\u0438\u0441\u043B\u043E\u0440\u043E\u0434\u0430 \u0432 \u043C\u043E\u0437\u0433\u0435 ".concat(_this.getOxygenDemand()));
+            //console.log(`Текущее количество кислорода в мозге ${this.getOxygenDemand()}`)
         }, 1000);
     }
     Brain.prototype.consumeOxygen = function (volume) {

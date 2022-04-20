@@ -1,11 +1,12 @@
 class Brain {
     static NAME: string = "Мозг";
-    private oxygenDemand: number = 100;
+    private oxygenDemand: number;
     private oxygenDemandMax: number = 600;
     private readonly processId = null;
     private alive = true;
 
-    constructor() {
+    constructor(oxygenVolume = 600) {
+        this.oxygenDemand = oxygenVolume;
         this.processId = setInterval(() => {
             this.consumeOxygen()
 
@@ -15,7 +16,7 @@ class Brain {
                 console.log(`Мозг погибает`);
             }
 
-            console.log(`Текущее количество кислорода в мозге ${this.getOxygenDemand()}`)
+            //console.log(`Текущее количество кислорода в мозге ${this.getOxygenDemand()}`)
         }, 1000);
     }
 

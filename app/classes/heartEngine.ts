@@ -2,6 +2,7 @@ const STANDARD_CHAMBER_STAMINA = 100;
 
 class HeartEngine {
     private chambersCount: number; // количество камер в сердце
+    private chambersActiveCount: number; // количество работающих камер в сердце
     private readonly chambers: Chamber[]; // храним массив объектов-камер
     private chambersIndexIds: Object = {}; // доступ к объектам-камер по индексам
     private lastWorkingCamberId: number = 0; // последнеотработавшая камера
@@ -16,6 +17,7 @@ class HeartEngine {
 
     constructor(chambersCount) {
         this.chambersCount = chambersCount;
+        this.chambersActiveCount = chambersCount;
         this.chambers = [];
         // генерируем камеры в сердце без возможности управления их параметрами
         for (let i = 0; i < chambersCount; i += 1) {
@@ -32,12 +34,17 @@ class HeartEngine {
         this.work();
     }
 
-    stop() {
+    stop(): void {
         this.textStatus = "Остановлено"
         clearTimeout(this.controller.processId);
     }
 
-    work() {
+    work(): void {
+        if (this.chambersActiveCount === 0) {
+            console.log(`Уничтожены все камеры, сердце не может продолжать работу`)
+            return this.stop();
+        }
+
         this.controller.tick();
     }
 
@@ -45,7 +52,7 @@ class HeartEngine {
         return this.textStatus;
     }
 
-    pumpTo(entity: Object) {
+    pumpTo(entity: Object): void {
         this.entityPumping = entity;
     }
 
@@ -78,6 +85,10 @@ class HeartEngine {
         return this.chambers[0];
     }
 
+    decreaseActiveChambers(): number {
+        return this.chambersActiveCount -= 1;
+    }
+
     getPulse(): number {
         return this.pulseCurrent;
     }
@@ -90,6 +101,7 @@ class Chamber {
     private readonly id: number;
     private stamina = STANDARD_CHAMBER_STAMINA;
     protected name: string = 'Камера №';
+    private destroyed = false;
 
     constructor(heart: HeartEngine) {
         this.heart = heart;
@@ -104,13 +116,13 @@ class Chamber {
 
     reduce(pushPower: number = 100) {
         this.stamina -= pushPower / 10;
-        this.heart.transportOxygen(pushPower);
+        this.heart.transportOxygen(pushPower / 2);
 
         console.log(`сокращение камеры ${this.getName()}, стамина ${this.getStamina()}`)
 
         if (this.stamina < 0) {
-            this.heart.stop();
-            console.log(`Остановка сердца, так как переутомилась ${this.getName()}`)
+            this.destroy();
+            console.log(`Уничтожена ${this.getName()}`)
         }
 
         this.heart.setLastWorkingChamber(this.id);
@@ -118,6 +130,15 @@ class Chamber {
 
     getStamina(): number {
         return this.stamina;
+    }
+
+    destroy(): void {
+        this.destroyed = true;
+        this.heart.decreaseActiveChambers();
+    }
+
+    getDestroyed(): boolean {
+        return this.destroyed;
     }
 
     getName(): string {
@@ -140,11 +161,15 @@ class NeuralController {
         let maxStamina = chambers[chambers.length - 1].getStamina();
         let chamberFreshId = chambers[chambers.length - 1].getId();
 
+
+
         chambers.forEach((chamber: Chamber) => {
-            const stamina = chamber.getStamina();
-            if (stamina > maxStamina) {
-                maxStamina = stamina;
-                chamberFreshId = chamber.getId()
+            if (chamber.getDestroyed() === false) {
+                const stamina = chamber.getStamina();
+                if (stamina > maxStamina) {
+                    maxStamina = stamina;
+                    chamberFreshId = chamber.getId()
+                }
             }
         });
 
