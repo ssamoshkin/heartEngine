@@ -1,4 +1,5 @@
 var STANDARD_CHAMBER_STAMINA = 100;
+var DEFAULT_STAMINA_RESTORE = 1;
 var HeartEngine = /** @class */ (function () {
     function HeartEngine(chambersCount) {
         this.chambersIndexIds = {}; // доступ к объектам-камер по индексам
@@ -94,7 +95,7 @@ var Chamber = /** @class */ (function () {
         this.id = heart.getChambers().length + 1;
         this.name += this.id;
         this.intervalId = setInterval(function () {
-            _this.restoreStamina(5);
+            _this.restoreStamina(DEFAULT_STAMINA_RESTORE);
         }, 100);
     }
     Chamber.prototype.getId = function () {
@@ -120,6 +121,7 @@ var Chamber = /** @class */ (function () {
         if (this.stamina > 100) {
             this.stamina = this.staminaMax;
         }
+        //console.log(`${this.getName()} восстановлено стамины ${stamina}, всего ${this.stamina}`)
         return this.stamina;
     };
     Chamber.prototype.destroy = function () {

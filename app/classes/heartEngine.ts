@@ -1,5 +1,5 @@
 const STANDARD_CHAMBER_STAMINA = 100;
-const DEFAULT_STAMINA_RESTORE = 2;
+const DEFAULT_STAMINA_RESTORE = 1;
 
 class HeartEngine {
     private chambersCount: number; // количество камер в сердце
@@ -154,6 +154,8 @@ class Chamber {
         if (this.stamina > 100) {
             this.stamina = this.staminaMax;
         }
+
+        //console.log(`${this.getName()} восстановлено стамины ${stamina}, всего ${this.stamina}`)
 
         return this.stamina;
     }
