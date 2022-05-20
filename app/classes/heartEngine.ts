@@ -196,8 +196,8 @@ class NeuralController {
     private heartEngine: HeartEngine;
     private intervalId = null;
 
-    constructor(HeartEngine) {
-        this.heartEngine = HeartEngine;
+    constructor(heartEngine: HeartEngine) {
+        this.heartEngine = heartEngine;
     }
 
     getFreshChamber(): Chamber {
