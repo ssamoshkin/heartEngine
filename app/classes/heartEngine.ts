@@ -1,14 +1,19 @@
 const STANDARD_CHAMBER_STAMINA = 100;
 const DEFAULT_STAMINA_RESTORE = 1;
 
+interface Controller {
+    getFreshChamber(): Chamber,
+    tick(): Chamber,
+}
+
 class HeartEngine {
     private active: boolean = true;
     private chambersCount: number; // количество камер в сердце
     private chambersActiveCount: number; // количество работающих камер в сердце
     private readonly chambers: Chamber[]; // храним массив объектов-камер
+    private readonly controller: Controller;
     private chambersIndexIds: Object = {}; // доступ к объектам-камер по индексам
     private lastWorkingCamberId: number = 0; // последнеотработавшая камера
-    private controller = null;
     private pulseCurrent = 0;
     private pulseMax = 220;
     private pulseMin = 20;
@@ -18,6 +23,7 @@ class HeartEngine {
     protected entityPumping = null;
 
     constructor(chambersCount) {
+        this.controller = new NeuralController(this); // // управление камерами через отдельный контроллер
         this.chambersCount = chambersCount;
         this.chambersActiveCount = chambersCount;
         this.chambers = [];
@@ -32,7 +38,6 @@ class HeartEngine {
     start(pulse = 60) {
         this.textStatus = "Запущено";
         this.pulseCurrent = pulse;
-        this.controller = new NeuralController(this); // // управление камерами через отдельный контроллер
         this.work();
     }
 
@@ -40,7 +45,7 @@ class HeartEngine {
         this.active = false;
         this.pulseCurrent = 0;
         this.textStatus = "Остановлено"
-        clearTimeout(this.controller.processId);
+        //clearTimeout(this.controller.processId);
         if (reason) {
             console.log(`Серде было остановлено по причине: ${reason}`)
         }
@@ -87,10 +92,6 @@ class HeartEngine {
 
     getChamberById(id: number): Chamber {
         return this.chambersIndexIds[id];
-    }
-
-    getActiveChamber(): Chamber {
-        return this.chambers[0];
     }
 
     decreaseActiveChambers(): number {
@@ -191,7 +192,7 @@ class Chamber {
     }
 }
 
-class NeuralController {
+class NeuralController implements Controller {
     // управляет камерами, балансирует нагрузку
     private heartEngine: HeartEngine;
     private intervalId = null;
@@ -205,8 +206,6 @@ class NeuralController {
 
         let maxStamina = chambers[chambers.length - 1].getStamina();
         let chamberFreshId = chambers[chambers.length - 1].getId();
-
-
 
         chambers.forEach((chamber: Chamber) => {
             if (chamber.getDestroyed() === false) {
@@ -225,7 +224,7 @@ class NeuralController {
         return this.heartEngine.getChamberById(chamberFreshId);
     }
 
-    tick() {
+    tick(): Chamber {
         const freshCamber = this.getFreshChamber();
 
         const pushedVolume = freshCamber.reduce();
@@ -248,7 +247,7 @@ class NeuralController {
             }, Math.round(60 / this.heartEngine.getPulse() * 1000));
         }
 
-        return this.heartEngine.getActiveChamber();
+        return freshCamber;
     }
 }
 
